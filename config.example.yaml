@@ -1,0 +1,16 @@
+app:
+  name: "email-service"
+  env: "development" # 可选: development 或 production
+
+kafka:
+  brokers:
+    - "global-kafka:9092" # Docker 环境下使用容器名，本地开发可填 localhost:9092
+  topic: "user.registered"
+  group_id: "email-service-group"
+
+smtp:
+  host: "smtp.163.com"
+  port: 25
+  username: "your_email@163.com"
+  password: "your_smtp_auth_code_here" # 这里填写邮箱的授权码，而非登录密码
+  from: "your_email@163.com"

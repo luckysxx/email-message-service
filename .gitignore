@@ -1,0 +1,24 @@
+# Go 核心忽略
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+*.test
+*.out
+go.work
+
+# 项目编译产物
+bin/
+email-service
+email-message-service
+
+# IDE 和操作系统缓存
+.idea/
+.vscode/
+*.swp
+*.swo
+.DS_Store
+
+# 包含敏感信息（密码、密钥）的文件绝对不能被提交！
+config.yaml

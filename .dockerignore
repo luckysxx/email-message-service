@@ -1,0 +1,16 @@
+# 版本控制
+.git
+.gitignore
+
+# 编译输出目录
+bin/
+email-service
+
+# IDE 配置文件
+.idea/
+.vscode/
+*.swp
+.DS_Store
+
+# 提示：如果你的 config.yaml 里写了真实的密码，
+# 且你打算开源这个项目，一定要把 config.yaml 加入 .gitignore！
