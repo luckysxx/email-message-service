@@ -1,16 +1,18 @@
 package service
 
 import (
+	"context"
 	"fmt"
 
-	"github.com/luckysxx/email-message-service/config"
+	"github.com/luckysxx/common/trace"
+	"github.com/luckysxx/email-message/config"
 	"go.uber.org/zap"
 	"gopkg.in/gomail.v2"
 )
 
 // Sender 是邮件发送的通用接口
 type Sender interface {
-	SendWelcomeEmail(toEmail, username string) error
+	SendWelcomeEmail(ctx context.Context, toEmail, username string) error
 }
 
 // smtpSender 是 Sender 接口的 SMTP 实现
@@ -31,7 +33,7 @@ func NewSMTPSender(cfg config.SMTPConfig, logger *zap.Logger) Sender {
 }
 
 // SendWelcomeEmail 实现了接口方法
-func (s *smtpSender) SendWelcomeEmail(toEmail, username string) error {
+func (s *smtpSender) SendWelcomeEmail(ctx context.Context, toEmail, username string) error {
 	m := gomail.NewMessage()
 	m.SetHeader("From", s.from)
 	m.SetHeader("To", toEmail)
@@ -40,7 +42,10 @@ func (s *smtpSender) SendWelcomeEmail(toEmail, username string) error {
 	body := "<h1>你好，" + username + "！</h1><p>感谢你注册我们的平台，快来体验吧。</p>"
 	m.SetBody("text/html", body)
 
+	traceID := trace.FromContext(ctx)
+
 	s.logger.Info("Dialing SMTP server to send welcome email",
+		zap.String("trace_id", traceID),
 		zap.String("target_email", toEmail),
 	)
 

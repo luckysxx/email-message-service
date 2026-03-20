@@ -33,10 +33,10 @@ type SMTPConfig struct {
 // LoadConfig 从指定路径加载配置文件并解析到 Config 结构体中
 func LoadConfig(path string) (*Config, error) {
 	viper.SetConfigFile(path)
-	
+
 	// 提供默认值
 	viper.SetDefault("app.env", "development")
-	
+
 	// 读取文件
 	if err := viper.ReadInConfig(); err != nil {
 		return nil, fmt.Errorf("failed to read config file '%s': %w", path, err)

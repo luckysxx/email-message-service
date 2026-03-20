@@ -6,10 +6,10 @@ import (
 	"os/signal"
 	"syscall"
 
-	"github.com/luckysxx/email-message-service/config"
-	"github.com/luckysxx/email-message-service/internal/handler"
-	"github.com/luckysxx/email-message-service/internal/service"
-	"github.com/luckysxx/email-message-service/pkg/logger"
+	"github.com/luckysxx/common/logger"
+	"github.com/luckysxx/email-message/config"
+	"github.com/luckysxx/email-message/internal/handler"
+	"github.com/luckysxx/email-message/internal/service"
 
 	"go.uber.org/zap"
 	"golang.org/x/sync/errgroup"
@@ -23,13 +23,8 @@ func main() {
 	}
 
 	// 2. 初始化结构化日志
-	log, err := logger.InitLogger(cfg.App.Env)
-	if err != nil {
-		panic("Failed to initialize logger: " + err.Error())
-	}
-	defer func() {
-		_ = log.Sync() // 确保在最终退出前，将所有缓冲区日志落盘或输出
-	}()
+	log := logger.NewLogger("email-message")
+	defer log.Sync()
 
 	log.Info("Starting Email Microservice...", zap.String("environment", cfg.App.Env))
 

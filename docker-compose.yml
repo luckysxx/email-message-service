@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   # 独立部署的邮件发送微服务
   email-service:
@@ -8,14 +6,11 @@ services:
       dockerfile: Dockerfile
     container_name: email-message-service
     restart: on-failure
-    # 将本地机器的配置挂载进去
     volumes:
       - ./config.yaml:/app/config.yaml
-    # 接入外部统一的基础设施网络
     networks:
       - go-net
 
-# 声明使用早已存在的公共网络 go-net
 networks:
   go-net:
     name: go-net

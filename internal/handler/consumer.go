@@ -4,9 +4,10 @@ import (
 	"context"
 	"encoding/json"
 
-	"github.com/luckysxx/email-message-service/config"
-	"github.com/luckysxx/email-message-service/internal/event"
-	"github.com/luckysxx/email-message-service/internal/service"
+	"github.com/luckysxx/common/trace"
+	"github.com/luckysxx/email-message/config"
+	"github.com/luckysxx/email-message/internal/event"
+	"github.com/luckysxx/email-message/internal/service"
 
 	"github.com/segmentio/kafka-go"
 	"go.uber.org/zap"
@@ -50,10 +51,21 @@ func (c *EmailConsumer) Start(ctx context.Context) error {
 			continue
 		}
 
+		// 解析 Trace ID
+		var traceID string
+		for _, h := range m.Headers {
+			if h.Key == trace.HeaderTraceID {
+				traceID = string(h.Value)
+				break
+			}
+		}
+		msgCtx := trace.IntoContext(ctx, traceID)
+
 		// 解析消息
 		var evt event.UserRegisteredEvent
 		if err := json.Unmarshal(m.Value, &evt); err != nil {
 			c.logger.Error("Failed to unmarshal event data",
+				zap.String("trace_id", traceID),
 				zap.Error(err),
 				zap.Int64("offset", m.Offset),
 				zap.ByteString("value", m.Value),
@@ -64,9 +76,10 @@ func (c *EmailConsumer) Start(ctx context.Context) error {
 		}
 
 		// 执行发邮件业务
-		if err := c.sender.SendWelcomeEmail(evt.Email, evt.Username); err != nil {
+		if err := c.sender.SendWelcomeEmail(msgCtx, evt.Email, evt.Username); err != nil {
 			// 规范：发邮件失败（可能是网络问题），依靠日志追踪，可以选择不 Commit 并重试，或送入死信队列
 			c.logger.Error("Failed to send welcome email",
+				zap.String("trace_id", traceID),
 				zap.Error(err),
 				zap.String("target_email", evt.Email),
 			)
@@ -74,6 +87,7 @@ func (c *EmailConsumer) Start(ctx context.Context) error {
 		}
 
 		c.logger.Info("Welcome email successfully sent",
+			zap.String("trace_id", traceID),
 			zap.String("target_email", evt.Email),
 			zap.Int64("offset", m.Offset),
 		)
