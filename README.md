@@ -1,4 +1,4 @@
-# Email Message Service 📧
+# Email Message Service
 
 异步邮件发送微服务。通过监听 Kafka 消息队列（Topic: `user.registered`），在用户注册后自动发送欢迎邮件。
 
