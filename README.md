@@ -1,66 +1,62 @@
 # Email Message Service 📧
 
-这是一个轻量但符合企业级微服务规范的邮件发送服务。它作为底层解耦的基础设施，通过异步监听 Kafka 消息队列（Topic: `user.registered`）来实现邮件群发与通知。
+异步邮件发送微服务。通过监听 Kafka 消息队列（Topic: `user.registered`），在用户注册后自动发送欢迎邮件。
 
-## 🚀 核心技术栈
-- **语言**：[Go 1.25+](https://golang.google.cn/)
-- **配置中心**：[Viper](https://github.com/spf13/viper)
-- **结构化追踪日志**：[Zap Logger (Customized)](https://github.com/uber-go/zap)
-- **并发与生命周期控制**： `golang.org/x/sync/errgroup` (优雅启停)
-- **消息队列驱动**：[Kafka-go](https://github.com/segmentio/kafka-go)
-- **容器化部署**：Multi-stage Docker, Docker Compose
+## 技术栈
+- **Go 1.25+** / **Viper** 配置管理 / **Zap** 结构化日志
+- **Kafka-go** 消息消费 / **gomail** SMTP 发送
+- **errgroup** 并发与优雅停机 / **Docker** 容器化部署
 
----
-
-## 📂 目录结构规范
+## 目录结构
 ```text
-.
-├── cmd/
-│   └── main.go                 # 进程主入口：负责启动环境与统一的依赖倒置(DI)组装
-├── config/
-│   └── config.go               # 配置结构体映射及自动解析
+├── cmd/main.go              # 主入口：配置加载、依赖注入、生命周期管理
+├── config/config.go         # Viper 配置结构体 + godotenv 加载
 ├── internal/
-│   ├── event/                  # Event/Message 模型定义
-│   ├── handler/                # Kafka 消费端核心逻辑 (无缝对接底层服务)
-│   └── service/                # 具体业务逻辑及 SMTP 发件协议封装
-├── pkg/
-│   └── logger/                 # 跨项目复用的日志基础设施，完美区分 Dev / Prod
-├── Dockerfile                  # 极简容器化编译文件
-├── docker-compose.yml          # 集成部署编排 (挂载外部网络)
-└── config.example.yaml         # 配置文件范例模板
+│   ├── event/               # 事件模型定义 (UserRegisteredEvent)
+│   ├── handler/consumer.go  # Kafka 消费者：拉取消息 → 解析 → 调用发件
+│   └── service/email.go     # SMTP 发件器：构造邮件 → DialAndSend
+├── config.yaml              # 非敏感配置骨架（提交到 Git）
+├── .env                     # 敏感凭证（不提交，见 .env.example）
+└── docker-compose.yml       # 容器编排
 ```
 
----
+## 快速开始
 
-## 🛠️ 如何运行
-
-### 1. 准备配置文件
-因为 `config.yaml` 中包含真实的邮箱密码和授权码等敏感信息，所以它**已被加入 `.gitignore`，不会被提交到代码仓库**。
-
-请在项目根目录复制一份模板作为你的真实配置：
+### 1. 配置环境变量
 ```bash
-cp config.example.yaml config.yaml
+cp .env.example .env
+# 编辑 .env，填入真实的 SMTP 邮箱授权码
 ```
-然后打开 `config.yaml` 填入你的**真实邮箱与授权码**。
 
-### 2. 本地开发调试 (Local Run)
-确保你的 Kafka 在 `localhost:9092` 可用，并将 `config.yaml` 中的 brokers 指向本地。
+### 2. 本地运行
 ```bash
-# 自动整理 Go 依赖
 go mod tidy
-
-# 编译并运行
 go run cmd/main.go
 ```
 
-### 3. 使用 Docker 部署 (Production/Stack)
-该服务已配置好接入外部的 `go-net` 基础设施网络（包含 Kafka 和数据库集群等）。
-确保 `config.yaml` 的 Kafka 地址为 `global-kafka:9092`，然后执行：
+### 3. Docker 部署
 ```bash
 docker-compose up -d --build
-```
 
-通过以下命令查看精美的控制台日志流：
-```bash
+# 查看日志
 docker logs -f email-message-service
 ```
+
+## 配置说明
+
+### config.yaml（非敏感，提交到 Git）
+| 字段 | 说明 | 示例 |
+|------|------|------|
+| `app.env` | 运行环境 | `development` |
+| `kafka.brokers` | Kafka 地址 | `global-kafka:9092` |
+| `kafka.topic` | 消费的主题 | `user.registered` |
+| `smtp.host` | SMTP 服务器 | `smtp.163.com` |
+| `smtp.port` | SMTP 端口 | `25` |
+
+### .env（敏感，不提交）
+| 变量 | 说明 |
+|------|------|
+| `APP_ENV` | 运行环境，影响日志颜色 |
+| `SMTP_USERNAME` | 邮箱账号 |
+| `SMTP_PASSWORD` | 邮箱 SMTP 授权码 |
+| `SMTP_FROM` | 发件人地址 |

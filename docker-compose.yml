@@ -6,6 +6,8 @@ services:
       dockerfile: Dockerfile
     container_name: email-message-service
     restart: on-failure
+    env_file:
+      - .env
     volumes:
       - ./config.yaml:/app/config.yaml
     networks:

@@ -17,16 +17,13 @@ import (
 
 func main() {
 	// 1. 初始化配置
-	cfg, err := config.LoadConfig("config.yaml")
-	if err != nil {
-		panic("Failed to load configuration: " + err.Error())
-	}
+	cfg := config.LoadConfig()
 
 	// 2. 初始化结构化日志
 	log := logger.NewLogger("email-message")
 	defer log.Sync()
 
-	log.Info("Starting Email Microservice...", zap.String("environment", cfg.App.Env))
+	log.Info("邮件服务启动中...", zap.String("environment", cfg.App.Env))
 
 	// 3. 依赖注入与组件装配
 	emailSender := service.NewSMTPSender(cfg.SMTP, log)
@@ -48,23 +45,23 @@ func main() {
 
 	select {
 	case sig := <-quit:
-		log.Info("Received OS shutdown signal", zap.String("signal", sig.String()))
+		log.Info("收到停机信号", zap.String("signal", sig.String()))
 		cancel() // 主动取消 ctx，通知在后台运行的消费者结束拉取
 	case <-egCtx.Done():
-		log.Info("Service context canceled internally (possibly an unrecoverable worker error)")
+		log.Info("服务内部 Context 被取消（可能存在不可恢复的 Worker 错误）")
 	}
 
 	// 阻塞并等待所有的后台 Goroutine 清理并安全退出
 	if err := eg.Wait(); err != nil {
-		log.Error("Service exited abnormally", zap.Error(err))
+		log.Error("服务异常退出", zap.Error(err))
 	} else {
-		log.Info("All background workers exited smoothly")
+		log.Info("所有后台任务已安全退出")
 	}
 
 	// 6. 清理底层网络与连接资源
 	if err := consumer.Close(); err != nil {
-		log.Error("Error closing components during shutdown", zap.Error(err))
+		log.Error("关闭底层组件时出错", zap.Error(err))
 	}
 
-	log.Info("Email Microservice stopped gracefully")
+	log.Info("邮件服务已安全退出")
 }

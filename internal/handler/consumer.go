@@ -37,17 +37,17 @@ func NewEmailConsumer(cfg config.KafkaConfig, sender service.Sender, logger *zap
 
 // Start 启动阻塞的消费循环，支持通过 context 的取消来实现优雅退出
 func (c *EmailConsumer) Start(ctx context.Context) error {
-	c.logger.Info("Starting Kafka email consumer loop")
+	c.logger.Info("Kafka 邮件消费者已启动")
 	for {
 		// FetchMessage 阻塞拉取消息
 		m, err := c.reader.FetchMessage(ctx)
 		if err != nil {
 			if ctx.Err() != nil {
-				c.logger.Info("Context canceled, stopping consumer loop")
+				c.logger.Info("Context 已取消，停止消费循环")
 				// 业务正常退出，不返回错误
 				return nil
 			}
-			c.logger.Error("Error fetching message from Kafka", zap.Error(err))
+			c.logger.Error("从 Kafka 拉取消息失败", zap.Error(err))
 			continue
 		}
 
@@ -64,7 +64,7 @@ func (c *EmailConsumer) Start(ctx context.Context) error {
 		// 解析消息
 		var evt event.UserRegisteredEvent
 		if err := json.Unmarshal(m.Value, &evt); err != nil {
-			c.logger.Error("Failed to unmarshal event data",
+			c.logger.Error("事件数据反序列化失败",
 				zap.String("trace_id", traceID),
 				zap.Error(err),
 				zap.Int64("offset", m.Offset),
@@ -78,7 +78,7 @@ func (c *EmailConsumer) Start(ctx context.Context) error {
 		// 执行发邮件业务
 		if err := c.sender.SendWelcomeEmail(msgCtx, evt.Email, evt.Username); err != nil {
 			// 规范：发邮件失败（可能是网络问题），依靠日志追踪，可以选择不 Commit 并重试，或送入死信队列
-			c.logger.Error("Failed to send welcome email",
+			c.logger.Error("发送欢迎邮件失败",
 				zap.String("trace_id", traceID),
 				zap.Error(err),
 				zap.String("target_email", evt.Email),
@@ -86,7 +86,7 @@ func (c *EmailConsumer) Start(ctx context.Context) error {
 			continue
 		}
 
-		c.logger.Info("Welcome email successfully sent",
+		c.logger.Info("欢迎邮件发送成功",
 			zap.String("trace_id", traceID),
 			zap.String("target_email", evt.Email),
 			zap.Int64("offset", m.Offset),
@@ -99,6 +99,6 @@ func (c *EmailConsumer) Start(ctx context.Context) error {
 
 // Close 释放网络资源
 func (c *EmailConsumer) Close() error {
-	c.logger.Info("Closing Kafka consumer reader")
+	c.logger.Info("正在关闭 Kafka 消费者")
 	return c.reader.Close()
 }

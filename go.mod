@@ -3,6 +3,7 @@ module github.com/luckysxx/email-message
 go 1.25.5
 
 require (
+	github.com/joho/godotenv v1.5.1
 	github.com/luckysxx/common v0.1.0
 	github.com/segmentio/kafka-go v0.4.50
 	github.com/spf13/viper v1.21.0

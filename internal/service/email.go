@@ -44,7 +44,7 @@ func (s *smtpSender) SendWelcomeEmail(ctx context.Context, toEmail, username str
 
 	traceID := trace.FromContext(ctx)
 
-	s.logger.Info("Dialing SMTP server to send welcome email",
+	s.logger.Info("正在连接 SMTP 服务器发送欢迎邮件",
 		zap.String("trace_id", traceID),
 		zap.String("target_email", toEmail),
 	)

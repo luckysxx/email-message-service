@@ -22,3 +22,6 @@ email-message-service
 
 # 包含敏感信息（密码、密钥）的文件绝对不能被提交！
 config.yaml
+.env
+.env.*
+!.env.example

@@ -1,7 +1,10 @@
 package config
 
 import (
-	"fmt"
+	"log"
+	"strings"
+
+	"github.com/joho/godotenv"
 	"github.com/spf13/viper"
 )
 
@@ -30,25 +33,29 @@ type SMTPConfig struct {
 	From     string `mapstructure:"from"`
 }
 
-// LoadConfig 从指定路径加载配置文件并解析到 Config 结构体中
-func LoadConfig(path string) (*Config, error) {
-	viper.SetConfigFile(path)
+// LoadConfig 从 Viper 加载配置，支持 .env 文件覆盖机密数据
+func LoadConfig() *Config {
+	// 尝试从根目录读取 .env 文件
+	_ = godotenv.Load()
 
-	// 提供默认值
-	viper.SetDefault("app.env", "development")
+	viper.SetConfigName("config")
+	viper.SetConfigType("yaml")
+	viper.AddConfigPath(".")
+	viper.AddConfigPath("./configs")
+	viper.AddConfigPath("/app")
 
-	// 读取文件
-	if err := viper.ReadInConfig(); err != nil {
-		return nil, fmt.Errorf("failed to read config file '%s': %w", path, err)
-	}
-
-	// 允许通过环境变量覆盖配置，例如设置 APP_ENV
+	// 允许环境变量覆盖配置 (比如 SMTP_PASSWORD=xxx)
+	viper.SetEnvKeyReplacer(strings.NewReplacer(".", "_"))
 	viper.AutomaticEnv()
+
+	if err := viper.ReadInConfig(); err != nil {
+		log.Printf("警告: 未找到 config.yaml，将完全依赖环境变量: %v", err)
+	}
 
 	var cfg Config
 	if err := viper.Unmarshal(&cfg); err != nil {
-		return nil, fmt.Errorf("failed to unmarshal config into struct: %w", err)
+		log.Fatalf("配置反序列化失败: %v", err)
 	}
 
-	return &cfg, nil
+	return &cfg
 }
