@@ -5,13 +5,15 @@ import (
 	"strings"
 
 	"github.com/joho/godotenv"
+	"github.com/luckysxx/common/pkg/redis"
 	"github.com/spf13/viper"
 )
 
 type Config struct {
-	App   AppConfig   `mapstructure:"app"`
-	Kafka KafkaConfig `mapstructure:"kafka"`
-	SMTP  SMTPConfig  `mapstructure:"smtp"`
+	App   AppConfig    `mapstructure:"app"`
+	Kafka KafkaConfig  `mapstructure:"kafka"`
+	Redis redis.Config `mapstructure:"redis"`
+	SMTP  SMTPConfig   `mapstructure:"smtp"`
 }
 
 type AppConfig struct {

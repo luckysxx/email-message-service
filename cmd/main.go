@@ -7,6 +7,7 @@ import (
 	"syscall"
 
 	"github.com/luckysxx/common/logger"
+	"github.com/luckysxx/common/pkg/redis"
 	"github.com/luckysxx/email-message/config"
 	"github.com/luckysxx/email-message/internal/handler"
 	"github.com/luckysxx/email-message/internal/service"
@@ -26,8 +27,11 @@ func main() {
 	log.Info("邮件服务启动中...", zap.String("environment", cfg.App.Env))
 
 	// 3. 依赖注入与组件装配
+	redisClient := redis.Init(cfg.Redis, log)
+	defer redisClient.Close()
+
 	emailSender := service.NewSMTPSender(cfg.SMTP, log)
-	consumer := handler.NewEmailConsumer(cfg.Kafka, emailSender, log)
+	consumer := handler.NewEmailConsumer(cfg.Kafka, redisClient, emailSender, log)
 
 	// 4. 应用生命周期和并发管理
 	ctx, cancel := context.WithCancel(context.Background())
