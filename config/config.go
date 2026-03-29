@@ -5,7 +5,7 @@ import (
 	"strings"
 
 	"github.com/joho/godotenv"
-	"github.com/luckysxx/common/pkg/redis"
+	"github.com/luckysxx/common/redis"
 	"github.com/spf13/viper"
 )
 

@@ -7,7 +7,7 @@ import (
 	"syscall"
 
 	"github.com/luckysxx/common/logger"
-	"github.com/luckysxx/common/pkg/redis"
+	"github.com/luckysxx/common/redis"
 	"github.com/luckysxx/email-message/config"
 	"github.com/luckysxx/email-message/internal/handler"
 	"github.com/luckysxx/email-message/internal/service"
