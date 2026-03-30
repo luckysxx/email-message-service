@@ -16,10 +16,10 @@ import (
 
 // EmailConsumer 负责处理和邮件相关的 Kafka 消息
 type EmailConsumer struct {
-	reader        *kafka.Reader
-	redisClient   *redis.Client  // 用于幂等性校验
-	sender        service.Sender // 依赖注入邮件发送器
-	logger        *zap.Logger    // 结构化组件日志
+	reader      *kafka.Reader
+	redisClient *redis.Client  // 用于幂等性校验
+	sender      service.Sender // 依赖注入邮件发送器
+	logger      *zap.Logger    // 结构化组件日志
 }
 
 // NewEmailConsumer 采用依赖注入方式构建消费者
@@ -31,10 +31,10 @@ func NewEmailConsumer(cfg config.KafkaConfig, redisClient *redis.Client, sender 
 	})
 
 	return &EmailConsumer{
-		reader:        r,
-		redisClient:   redisClient,
-		sender:        sender,
-		logger:        logger.With(zap.String("component", "kafka_consumer"), zap.String("topic", cfg.Topic)),
+		reader:      r,
+		redisClient: redisClient,
+		sender:      sender,
+		logger:      logger.With(zap.String("component", "kafka_consumer"), zap.String("topic", cfg.Topic)),
 	}
 }
 
@@ -74,6 +74,20 @@ func (c *EmailConsumer) Start(ctx context.Context) error {
 				zap.ByteString("value", m.Value),
 			)
 			// 规范：对于解析失败这种无法恢复的结构体错误，记录日志并跳过 Commit
+			c.reader.CommitMessages(ctx, m)
+			continue
+		}
+
+		// 向后兼容历史消息：旧消息未携带 version 时按 v1 处理。
+		if evt.Version == "" {
+			evt.Version = event.UserRegisteredVersion
+		}
+		if evt.Version != event.UserRegisteredVersion {
+			c.logger.Error("不支持的事件版本，跳过处理",
+				zap.String("trace_id", traceID),
+				zap.String("version", evt.Version),
+				zap.Int64("offset", m.Offset),
+			)
 			c.reader.CommitMessages(ctx, m)
 			continue
 		}

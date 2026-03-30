@@ -1,9 +1,7 @@
 package event
 
-type UserRegisteredEvent struct {
-	EventType string `json:"event_type"`
-	UserID    int64  `json:"user_id"`
-	Email     string `json:"email"`
-	Username  string `json:"username"`
-	Timestamp int64  `json:"timestamp"`
-}
+import mqevents "github.com/luckysxx/common/mq/events"
+
+type UserRegisteredEvent = mqevents.UserRegistered
+
+const UserRegisteredVersion = mqevents.UserRegisteredVersion

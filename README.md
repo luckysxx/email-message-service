@@ -53,6 +53,12 @@ docker logs -f email-message-service
 | `smtp.host` | SMTP 服务器 | `smtp.163.com` |
 | `smtp.port` | SMTP 端口 | `25` |
 
+## Kafka Topic 约定
+
+项目统一使用全小写 + 点分隔的 Topic 命名，例如 `user.registered`。如果历史环境里还残留 `UserRegistered` 或 `user_registered`，它们是不同的 Kafka Topic，不会自动合并，确认无消费者后可手动删除。
+
+消费者按共享契约处理 `common/mq` 中定义的事件结构。当前 `user.registered` 事件版本为 `v1`；历史消息如果没有 `version` 字段，消费者会按 `v1` 兼容处理。
+
 ### .env（敏感，不提交）
 | 变量 | 说明 |
 |------|------|

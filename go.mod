@@ -49,8 +49,9 @@ require (
 	github.com/go-viper/mapstructure/v2 v2.4.0 // indirect
 	github.com/google/uuid v1.6.0 // indirect
 	github.com/klauspost/compress v1.18.0 // indirect
-	github.com/luckysxx/common/logger v0.0.0
-	github.com/luckysxx/common/redis v0.0.0
+	github.com/luckysxx/common/logger v0.3.0
+	github.com/luckysxx/common/mq v0.1.0
+	github.com/luckysxx/common/redis v0.2.0
 	github.com/luckysxx/common/trace v0.1.0
 	github.com/pelletier/go-toml/v2 v2.2.4 // indirect
 	github.com/pierrec/lz4/v4 v4.1.18 // indirect
@@ -70,23 +71,3 @@ require (
 	golang.org/x/text v0.35.0 // indirect
 	gopkg.in/alexcesaro/quotedprintable.v3 v3.0.0-20150716171945-2caba252f4dc // indirect
 )
-
-replace google.golang.org/genproto => google.golang.org/genproto v0.0.0-20260319201613-d00831a3d3e7
-
-replace github.com/luckysxx/common/crypto => ../common/crypto
-
-replace github.com/luckysxx/common/errs => ../common/errs
-
-replace github.com/luckysxx/common/logger => ../common/logger
-
-replace github.com/luckysxx/common/otel => ../common/otel
-
-replace github.com/luckysxx/common/proto => ../common/proto
-
-replace github.com/luckysxx/common/ratelimiter => ../common/ratelimiter
-
-replace github.com/luckysxx/common/redis => ../common/redis
-
-replace github.com/luckysxx/common/rpc => ../common/rpc
-
-replace github.com/luckysxx/common/trace => ../common/trace
