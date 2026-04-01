@@ -5,8 +5,8 @@ FROM golang:1.25.5-alpine AS builder
 # 设置工作目录
 WORKDIR /app
 
-# 设置 GOPROXY 代理，加速国内下载依赖（如果你在海外可以去掉这行）
-ENV GOPROXY=https://goproxy.cn,direct
+# 设置 GOPROXY 代理，优先走官方代理，失败时再 direct
+ENV GOPROXY=https://proxy.golang.org,direct
 
 # 1. 复制 go.mod 和 go.sum 并下载依赖
 COPY go.mod go.sum ./

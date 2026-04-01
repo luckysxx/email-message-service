@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/luckysxx/common/trace"
+	commonlogger "github.com/luckysxx/common/logger"
 	"github.com/luckysxx/email-message/config"
 	"go.uber.org/zap"
 	"gopkg.in/gomail.v2"
@@ -25,10 +25,16 @@ type smtpSender struct {
 // NewSMTPSender 是一个构造函数，包含配置项和结构化日志对象的注入
 func NewSMTPSender(cfg config.SMTPConfig, logger *zap.Logger) Sender {
 	dialer := gomail.NewDialer(cfg.Host, cfg.Port, cfg.Username, cfg.Password)
+	dialer.SSL = cfg.SSL
 	return &smtpSender{
 		dialer: dialer,
 		from:   cfg.From,
-		logger: logger.With(zap.String("component", "smtp_sender")),
+		logger: logger.With(
+			zap.String("component", "smtp_sender"),
+			zap.String("smtp_host", cfg.Host),
+			zap.Int("smtp_port", cfg.Port),
+			zap.Bool("smtp_ssl", cfg.SSL),
+		),
 	}
 }
 
@@ -42,10 +48,7 @@ func (s *smtpSender) SendWelcomeEmail(ctx context.Context, toEmail, username str
 	body := "<h1>你好，" + username + "！</h1><p>感谢你注册我们的平台，快来体验吧。</p>"
 	m.SetBody("text/html", body)
 
-	traceID := trace.FromContext(ctx)
-
-	s.logger.Info("正在连接 SMTP 服务器发送欢迎邮件",
-		zap.String("trace_id", traceID),
+	commonlogger.Ctx(ctx, s.logger).Info("正在连接 SMTP 服务器发送欢迎邮件",
 		zap.String("target_email", toEmail),
 	)
 

@@ -51,7 +51,8 @@ docker logs -f email-message-service
 | `kafka.brokers` | Kafka 地址 | `global-kafka:9092` |
 | `kafka.topic` | 消费的主题 | `user.registered` |
 | `smtp.host` | SMTP 服务器 | `smtp.163.com` |
-| `smtp.port` | SMTP 端口 | `25` |
+| `smtp.port` | SMTP 端口 | `465` |
+| `smtp.ssl` | 是否使用隐式 SSL | `true` |
 
 ## Kafka Topic 约定
 

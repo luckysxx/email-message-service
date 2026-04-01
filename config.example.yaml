@@ -10,7 +10,8 @@ kafka:
 
 smtp:
   host: "smtp.163.com"
-  port: 25
+  port: 465
+  ssl: true
   username: "your_email@163.com"
   password: "your_smtp_auth_code_here" # 这里填写邮箱的授权码，而非登录密码
   from: "your_email@163.com"

@@ -30,6 +30,7 @@ type KafkaConfig struct {
 type SMTPConfig struct {
 	Host     string `mapstructure:"host"`
 	Port     int    `mapstructure:"port"`
+	SSL      bool   `mapstructure:"ssl"`
 	Username string `mapstructure:"username"`
 	Password string `mapstructure:"password"`
 	From     string `mapstructure:"from"`
