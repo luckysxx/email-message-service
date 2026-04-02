@@ -15,7 +15,7 @@
 │   ├── event/               # 事件模型定义 (UserRegisteredEvent)
 │   ├── handler/consumer.go  # Kafka 消费者：拉取消息 → 解析 → 调用发件
 │   └── service/email.go     # SMTP 发件器：构造邮件 → DialAndSend
-├── config.yaml              # 非敏感配置骨架（提交到 Git）
+├── config.example.yaml      # 非敏感配置骨架模板（提交到 Git）
 ├── .env                     # 敏感凭证（不提交，见 .env.example）
 └── docker-compose.yml       # 容器编排
 ```
@@ -25,6 +25,7 @@
 ### 1. 配置环境变量
 ```bash
 cp .env.example .env
+cp config.example.yaml config.yaml
 # 编辑 .env，填入真实的 SMTP 邮箱授权码
 ```
 
@@ -44,7 +45,7 @@ docker logs -f email-message-service
 
 ## 配置说明
 
-### config.yaml（非敏感，提交到 Git）
+### config.example.yaml（非敏感模板，提交到 Git）
 | 字段 | 说明 | 示例 |
 |------|------|------|
 | `app.env` | 运行环境 | `development` |

@@ -34,8 +34,8 @@ ENV TZ=Asia/Shanghai
 # 从编译阶段拷贝生成的可执行文件
 COPY --from=builder /app/bin/email-service .
 
-# 拷贝配置文件（生产环境一般通过 volume 挂载或纯环境变量，这里为了方便演示一并拷贝）
-COPY --from=builder /app/config.yaml .
+# 拷贝默认配置骨架，避免 CI 因仓库中不存在 config.yaml 而构建失败
+COPY --from=builder /app/config.example.yaml ./config.yaml
 
 # 启动微服务
 CMD ["./email-service"]
