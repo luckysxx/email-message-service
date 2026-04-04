@@ -7,6 +7,7 @@ import (
 	"syscall"
 
 	"github.com/luckysxx/common/logger"
+	"github.com/luckysxx/common/probe"
 	"github.com/luckysxx/common/redis"
 	"github.com/luckysxx/email-message/config"
 	"github.com/luckysxx/email-message/internal/handler"
@@ -36,6 +37,12 @@ func main() {
 	// 4. 应用生命周期和并发管理
 	ctx, cancel := context.WithCancel(context.Background())
 	eg, egCtx := errgroup.WithContext(ctx)
+
+	// 探针管理端口：/healthz, /readyz, /metrics
+	probeShutdown := probe.Serve(ctx, ":9095", log,
+		probe.WithRedis(redisClient),
+	)
+	defer probeShutdown()
 
 	// 在 errgroup 组后台启动 Kafka 消费者
 	eg.Go(func() error {
